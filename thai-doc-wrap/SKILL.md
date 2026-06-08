@@ -97,11 +97,59 @@ python3 scripts/apply_indent.py thesis.docx --cm 1.0 -o thesis_final.docx    # 1
 
 > หลักสำคัญ: อย่าย่อหน้าด้วยการกด Tab จริงหรือเคาะเว้นวรรค ให้ตั้งค่าที่ระดับย่อหน้า เพื่อให้ระยะคงที่และแก้ทั้งเอกสารได้ — รายละเอียดและตารางเทียบมาตรฐานดูใน `references/research-indent-standard.md`
 
+## กั้นหน้าหลัง (Page Margins) — `page_margin.py`
+
+ตั้งขอบกระดาษให้ทุก section ใน .docx รองรับ preset สำเร็จรูปและกำหนดเองได้
+
+```bash
+# preset สำเร็จรูป
+python3 scripts/page_margin.py report.docx --preset a4-thai -o report_final.docx
+python3 scripts/page_margin.py thesis.docx --preset thesis-mku -o thesis_final.docx
+
+# กำหนดเองเป็นซม.
+python3 scripts/page_margin.py input.docx --top 3 --bottom 2.5 --left 3 --right 2.5 -o out.docx
+```
+
+| Preset | บน | ล่าง | ซ้าย | ขวา | เหมาะกับ |
+|---|---|---|---|---|---|
+| `a4-thai` | 2.54 | 2.54 | 3.0 | 2.0 | เอกสารราชการไทย |
+| `a4-standard` | 2.54 | 2.54 | 2.54 | 2.54 | เอกสารทั่วไป (1" ทุกด้าน) |
+| `thesis-mku` | 3.0 | 2.5 | 4.0 | 2.5 | วิทยานิพนธ์ มจพ. (คู่มือ 2558) |
+| `report` | 2.5 | 2.5 | 3.0 | 2.5 | รายงานทั่วไป |
+
+สำหรับ HTML/PDF ให้แก้ `@page { margin: ... }` ใน `assets/thai-print.css` โดยตรง (มี preset ให้เปลี่ยนแปลงในคอมเมนต์)
+
+## ป้องกันตารางล้นขอบ (Table Overflow) — `table_fit.py`
+
+ตารางที่ copy-paste จาก Excel หรือกำหนดความกว้างแบบ fixed มักล้นออกนอกกระดาษ script นี้ตรวจและแก้อัตโนมัติ
+
+```bash
+# auto: ย่อเฉพาะตารางที่ล้น (ค่าเริ่มต้น แนะนำ)
+python3 scripts/table_fit.py input.docx -o output.docx
+
+# autofit: ทุกตารางใช้ AutoFit to Window
+python3 scripts/table_fit.py input.docx --mode autofit -o output.docx
+
+# fixed: ย่อสัดส่วนทุกตารางโดยไม่ AutoFit
+python3 scripts/table_fit.py input.docx --mode fixed -o output.docx
+```
+
+| Mode | พฤติกรรม | เหมาะกับ |
+|---|---|---|
+| `auto` | ย่อเฉพาะตารางที่กว้างกว่าพื้นที่ข้อความ | ใช้ทั่วไป (ค่าเริ่มต้น) |
+| `autofit` | ตั้ง AutoFit to Window ทุกตาราง | ต้องการให้ตารางยืดหยุ่น |
+| `fixed` | ย่อสัดส่วนคอลัมน์ทุกตาราง ไม่ AutoFit | ต้องการควบคุมความกว้างแน่นอน |
+| `pct` | ตั้ง 100% ของพื้นที่ข้อความทุกตาราง | เอกสารที่มีหลายคอลัมน์ |
+
+สำหรับ HTML ให้ใช้กฎ CSS จาก `assets/thai-print.css` (บล็อก `.table-wrap` และ `table`) ที่เพิ่มไว้แล้ว เพียงห่อตารางด้วย `<div class="table-wrap"><table>...</table></div>`
+
 ## ลำดับการทำงานในงานวิจัย (แนะนำ)
 
 1. สร้าง/แก้เนื้อหา .docx (ใช้ docx skill)
-2. `apply_indent.py` — ตั้งย่อหน้าสากล 1.27 ซม. + ระยะแท็บ
-3. `thai_wrap.py` — ตัดคำไทย กันบรรทัดตัดกลางคำ (ทำเป็นขั้นสุดท้ายเสมอ)
+2. `page_margin.py` — ตั้งขอบกระดาษให้ถูกต้องตามมาตรฐาน
+3. `table_fit.py` — ป้องกันตารางล้นขอบ
+4. `apply_indent.py` — ตั้งย่อหน้าสากล 1.27 ซม. + ระยะแท็บ
+5. `thai_wrap.py` — ตัดคำไทย กันบรรทัดตัดกลางคำ (ทำเป็นขั้นสุดท้ายเสมอ)
 
 ## หลักการทำงาน (สำหรับปรับแต่ง)
 

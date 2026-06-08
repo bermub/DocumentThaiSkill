@@ -41,10 +41,53 @@ p {
   text-indent: 1.27cm; /* ย่อหน้าบรรทัดแรก มาตรฐานสากล (0.5"); มจพ.ใช้ 1.0cm */
 }
 
+/* ----- ตาราง: กันล้นขอบและตัดสวยงาม -----
+ * max-width: 100%   ป้องกันตารางกว้างกว่าคอนเทนเนอร์
+ * table-layout: fixed + width: 100%  บังคับให้คอลัมน์แบ่งตามพื้นที่จริง
+ * overflow-x: auto  เพิ่ม scrollbar แนวนอนเมื่อดูบนหน้าจอ (ไม่กระทบ PDF)
+ */
+.table-wrap {
+  overflow-x: auto;        /* scroll บนหน้าจอเล็กแทนการล้น */
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;     /* คอลัมน์กว้างเท่ากันตามพื้นที่ ไม่ขยายตามเนื้อหา */
+  border-collapse: collapse;
+  word-break: break-word;  /* เซลล์ที่แคบ: ตัดคำเพื่อป้องกันล้น */
+  overflow-wrap: break-word;
+}
+
+th, td {
+  padding: 4pt 6pt;
+  border: 1px solid #888;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: none;
+}
+
+/* ตารางหัวเข้ม */
+thead th {
+  background: #f0f0f0;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* สลับสีแถว (optional) */
+tbody tr:nth-child(even) { background: #fafafa; }
+
 /* ----- งานพิมพ์ / PDF ----- */
 @page {
   size: A4;
-  margin: 2.54cm 2.54cm 2.54cm 3.81cm; /* บน ขวา ล่าง ซ้าย (เผื่อเข้าเล่ม) */
+  /* preset: a4-thai (ราชการ) — บน 2.54, ล่าง 2.54, ซ้าย 3.0, ขวา 2.0 ซม.
+   * เปลี่ยนเป็น "2.54cm 2.54cm 2.54cm 2.54cm" สำหรับ a4-standard
+   * เปลี่ยนเป็น "3.0cm 2.5cm 4.0cm 2.5cm" สำหรับ thesis-mku
+   */
+  margin: 2.54cm 2.0cm 2.54cm 3.0cm; /* บน ขวา ล่าง ซ้าย */
 }
 
 @media print {
@@ -52,5 +95,16 @@ p {
   /* กันหัวข้อโดดเดี่ยวท้ายหน้า และไม่ให้ตัดกลางย่อหน้าน้อยเกินไป */
   h1, h2, h3, h4 { break-after: avoid; }
   p, li { orphans: 2; widows: 2; }
-  table, figure, img { break-inside: avoid; }
+  figure, img { break-inside: avoid; }
+
+  /* ตาราง: พิมพ์ต่อเนื่องข้ามหน้าได้แต่ห้ามตัดภายในแถว
+   * และแสดง header ซ้ำทุกหน้าโดยอัตโนมัติผ่าน <thead>
+   */
+  table { break-inside: auto; border-collapse: collapse; }
+  tr    { break-inside: avoid; }
+  thead { display: table-header-group; } /* ซ้ำหัวตารางทุกหน้า */
+  tfoot { display: table-footer-group; }
+
+  /* ซ่อน scrollbar wrapper ตอนพิมพ์ */
+  .table-wrap { overflow: visible; }
 }
