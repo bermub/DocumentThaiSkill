@@ -181,10 +181,13 @@ def main():
     dst = Path(args.output) if args.output else src.with_suffix(".tablefit.docx")
     stats, text_w = process_doc(src, dst, args.mode)
 
-    print(f"✓ ตรวจ {stats['checked']} ตาราง | ย่อสัดส่วน: {stats['scaled']} | "
-          f"AutoFit: {stats['autofit']} | ปกติ: {stats['ok']}")
-    print(f"  พื้นที่ข้อความ: {text_w/20:.1f} pt ({text_w/1440*2.54:.2f} ซม.)")
-    print(f"  บันทึกแล้ว → {dst}")
+    import io
+    out = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    out.write(f"OK: checked {stats['checked']} table(s) | scaled: {stats['scaled']} | "
+              f"autofit: {stats['autofit']} | ok: {stats['ok']}\n")
+    out.write(f"   text area: {text_w/20:.1f} pt ({text_w/1440*2.54:.2f} cm)\n")
+    out.write(f"   saved -> {dst}\n")
+    out.flush()
 
 
 if __name__ == "__main__":

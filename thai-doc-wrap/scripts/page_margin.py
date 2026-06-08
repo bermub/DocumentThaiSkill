@@ -79,8 +79,11 @@ def main():
     dst = Path(args.output) if args.output else src.with_suffix(".margin.docx")
 
     sections = set_margins(src, dst, top, bottom, left, right)
-    print(f"✓ ตั้งขอบกระดาษ {sections} section: บน={top} ล่าง={bottom} ซ้าย={left} ขวา={right} ซม.")
-    print(f"  บันทึกแล้ว → {dst}")
+    import sys, io
+    out = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    out.write(f"OK: set margins on {sections} section(s): top={top} bottom={bottom} left={left} right={right} cm\n")
+    out.write(f"   saved -> {dst}\n")
+    out.flush()
 
 
 if __name__ == "__main__":
