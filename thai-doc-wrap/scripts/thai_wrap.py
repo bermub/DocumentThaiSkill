@@ -129,20 +129,47 @@ def _set_run_thai_lang(run):
     lang.set(qn("w:bidi"), "th-TH")
 
 
+def _para_is_justified(para) -> bool:
+    """คืนค่า True ถ้าย่อหน้ากำหนด text-align: justify (w:jc = both/distribute)
+    Word กระจาย space ตาม ZWSP ทุกจุดในโหมด justify ทำให้ช่องว่างถ่างมาก
+    จึงต้องข้ามการแทรก ZWSP และใช้ th-TH language ให้ Word ตัดคำเองแทน
+    """
+    from docx.oxml.ns import qn
+    pPr = para._p.find(qn("w:pPr"))
+    if pPr is None:
+        return False
+    jc = pPr.find(qn("w:jc"))
+    if jc is None:
+        return False
+    val = jc.get(qn("w:val"), "")
+    return val in ("both", "distribute", "highKashida", "lowKashida", "mediumKashida")
+
+
 def process_docx(in_path: str, out_path: str, engine: str, set_lang: bool = True) -> int:
+    """แทรก ZWSP ใน run ที่ไม่ใช่ justified paragraph
+    สำหรับ justified paragraph: ข้าม ZWSP แต่ยังตั้ง th-TH language เพื่อให้ Word
+    ใช้ตัวตัดคำในตัวเอง (ซึ่งทำงานได้ดีกับ justify โดยไม่เกิดช่องว่างถ่าง)
+    """
     from docx import Document
 
     doc = Document(in_path)
     n_runs = 0
+    n_skipped_justify = 0
     for para in _iter_paragraphs(doc):
+        justified = _para_is_justified(para)
         for run in para.runs:
-            if run.text and run.text.strip():
+            if not run.text or not run.text.strip():
+                continue
+            if set_lang:
+                _set_run_thai_lang(run)
+            if justified:
+                # justified → ไม่แทรก ZWSP ให้ Word ตัดคำเองผ่าน th-TH lang
+                n_skipped_justify += 1
+            else:
                 run.text = segment_text(run.text, engine, ZWSP)
-                if set_lang:
-                    _set_run_thai_lang(run)
                 n_runs += 1
     doc.save(out_path)
-    return n_runs
+    return n_runs, n_skipped_justify
 
 
 def main():
@@ -172,8 +199,8 @@ def main():
         if not args.input:
             sys.exit("DOCX ต้องระบุไฟล์เข้า")
         out = args.output or args.input.rsplit(".", 1)[0] + ".wrapped.docx"
-        n = process_docx(args.input, out, args.engine, set_lang=not args.no_lang)
-        print(f"✓ ตัดคำแล้ว {n} run → {out}", file=sys.stderr)
+        n, n_skip = process_docx(args.input, out, args.engine, set_lang=not args.no_lang)
+        print(f"✓ ตัดคำแล้ว {n} run (ข้าม {n_skip} run ใน justified para) → {out}", file=sys.stderr)
         return
 
     data = open(args.input, encoding="utf-8").read() if args.input else sys.stdin.read()
