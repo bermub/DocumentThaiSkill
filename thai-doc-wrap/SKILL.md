@@ -1,8 +1,16 @@
 ---
 name: thai-doc-wrap
-description: "จัดเอกสารภาษาไทยให้ตัดคำสวยงาม ไม่ตัดบรรทัดกลางคำ โดยใช้พจนานุกรมตัดคำหาขอบเขตคำแล้วแทรกจุดตัดบรรทัดที่มองไม่เห็น (Zero-Width Space) ใช้ skill นี้ทุกครั้งที่ผู้ใช้สร้าง/จัดรูปแบบเอกสารไทยแล้วเจอปัญหาบรรทัดตัดกลางคำ ข้อความล้นขอบ หรือขอความว่า 'ตัดคำ' 'จัดคำ' 'word wrap ภาษาไทย' 'ขึ้นบรรทัดใหม่กลางคำ' 'ตัดบรรทัดไม่สวย' รวมถึงงานเอกสาร .txt, .html, .docx และไฟล์พิมพ์/PDF ภาษาไทย และยังตั้งมาตรฐานการย่อหน้าบรรทัดแรก (first-line indent / การแท็บหน้าเอกสาร) แบบสากลตามงานวิจัย (APA/MLA/Chicago 1.27 ซม.) ใช้แม้ผู้ใช้ไม่ได้พูดคำว่า 'ตัดคำ' ตรง ๆ เช่นเมื่อจัดหน้ารายงานวิจัย ใบความรู้ ข้อสอบ หรือเอกสารราชการเป็นภาษาไทย หรือขอให้ 'ย่อหน้า' 'จัดย่อหน้า' 'tab/indent งานวิจัย'"
-compatibility: "Cowork, Claude.ai, Claude Desktop. ใช้คู่กับ docx skill (/mnt/skills/public/docx/SKILL.md) เมื่อสร้างไฟล์ Word และคู่กับ frontend-design/CSS เมื่อทำเอกสาร HTML/พิมพ์"
-license: User-provided. ใช้ PyThaiNLP (Apache-2.0)
+version: "1.2.0"
+description: "จัดเอกสารภาษาไทยให้สวยงามครบวงจร ครอบคลุม 4 ปัญหาหลัก: (1) ตัดคำไม่ตัดกลางคำ — แทรก Zero-Width Space ด้วย PyThaiNLP รองรับ .txt .html .docx (2) กั้นหน้าหลัง — ตั้งขอบกระดาษ .docx ด้วย preset สำเร็จรูป a4-thai/a4-standard/thesis-mku/report (3) ตัดตารางไม่ให้ล้น — ย่อสัดส่วนหรือ AutoFit ตารางที่กว้างเกินหน้ากระดาษ (4) ย่อหน้าบรรทัดแรกมาตรฐานสากล APA/MLA 1.27 ซม. ใช้ skill นี้เมื่อผู้ใช้พูดถึง: 'ตัดคำ' 'จัดคำ' 'word wrap ภาษาไทย' 'ขึ้นบรรทัดใหม่กลางคำ' 'ตัดบรรทัดไม่สวย' 'กั้นหน้า' 'ขอบกระดาษ' 'ตารางล้น' 'ตารางเกินหน้า' 'ย่อหน้า' 'indent' 'tab หน้าเอกสาร' รวมถึงการสร้างรายงานวิจัย ใบความรู้ ข้อสอบ เอกสารราชการ วิทยานิพนธ์ เป็นภาษาไทย"
+compatibility: "Cowork, Claude.ai, Claude Desktop. ใช้คู่กับ docx skill เมื่อสร้าง Word และคู่กับ HTML/CSS เมื่อทำเอกสารพิมพ์/PDF"
+license: User-provided. ใช้ PyThaiNLP (Apache-2.0), python-docx (MIT)
+scripts:
+  - scripts/thai_wrap.py    # ตัดคำ: แทรก ZWSP ที่ขอบเขตคำ (.txt/.html/.docx)
+  - scripts/page_margin.py  # ขอบกระดาษ: ตั้ง margin ทุก section ใน .docx
+  - scripts/table_fit.py    # ตาราง: ย่อสัดส่วน/AutoFit ตารางที่ล้นขอบ
+  - scripts/apply_indent.py # ย่อหน้า: first-line indent 1.27 ซม. มาตรฐานสากล
+tests:
+  - tests/create.js         # สร้างเอกสาร 3 หน้าทดสอบทุก feature
 ---
 
 # Thai Document Word-Wrap (ตัดคำไทยให้สวยงาม)
