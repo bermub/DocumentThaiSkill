@@ -1,0 +1,56 @@
+/* thai-print.css — แม่แบบจัดเอกสารพิมพ์ภาษาไทยให้ตัดคำสวยงาม
+ * ใช้คู่กับ thai_wrap.py: สคริปต์แทรก ZWSP ที่ขอบเขตคำ ส่วน CSS นี้
+ * บอกเบราว์เซอร์ให้ตัดบรรทัด "เฉพาะ" ที่จุดตัด และจัดขอบให้เรียบ
+ */
+
+/* ----- ฟอนต์ ----- */
+@font-face {
+  font-family: "TH Sarabun New";
+  src: local("TH Sarabun New"), local("TH SarabunPSK");
+}
+
+html[lang="th"], body {
+  font-family: "TH Sarabun New", "TH SarabunPSK", "Sarabun", sans-serif;
+  font-size: 16pt;
+  line-height: 1.5;
+}
+
+/* ----- หัวใจของการตัดคำสวยงาม -----
+ * overflow-wrap: break-word  ป้องกันคำยาว/URL ทะลุขอบ
+ * word-break: normal         อย่าตัดกลางคำพร่ำเพรื่อ (ปล่อยให้ ZWSP คุม)
+ * line-break: normal         ใช้กฎตัดบรรทัดมาตรฐาน
+ * hyphens: none              ภาษาไทยไม่ใช้ยัติภังค์
+ * ZWSP (U+200B) ที่ thai_wrap.py แทรกไว้ จะเป็นจุดที่เบราว์เซอร์ตัดบรรทัดได้
+ */
+p, li, td, th, div, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-break: normal;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* จัดขอบชิดทั้งสองข้าง (justify) ให้ดูเป็นทางการ
+ * เมื่อมี ZWSP คั่นคำ เบราว์เซอร์จะกระจายช่องว่างที่ขอบเขตคำได้พอดี
+ * ถ้าไม่ต้องการขอบชิดสองข้าง ให้ลบบล็อกนี้ออก
+ */
+p {
+  text-align: justify;
+  text-justify: inter-character; /* ช่วยให้ภาษาไทยกระจายเรียบกว่า inter-word */
+  margin: 0 0 0.5em 0;
+  text-indent: 1.27cm; /* ย่อหน้าบรรทัดแรก มาตรฐานสากล (0.5"); มจพ.ใช้ 1.0cm */
+}
+
+/* ----- งานพิมพ์ / PDF ----- */
+@page {
+  size: A4;
+  margin: 2.54cm 2.54cm 2.54cm 3.81cm; /* บน ขวา ล่าง ซ้าย (เผื่อเข้าเล่ม) */
+}
+
+@media print {
+  body { font-size: 16pt; }
+  /* กันหัวข้อโดดเดี่ยวท้ายหน้า และไม่ให้ตัดกลางย่อหน้าน้อยเกินไป */
+  h1, h2, h3, h4 { break-after: avoid; }
+  p, li { orphans: 2; widows: 2; }
+  table, figure, img { break-inside: avoid; }
+}

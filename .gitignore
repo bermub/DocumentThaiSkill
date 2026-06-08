@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pdf
+page-*.png
+*.wrapped.docx
+*.indent.docx
+.DS_Store
